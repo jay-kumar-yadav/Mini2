@@ -1,95 +1,76 @@
-// document.addEventListener('DOMContentLoaded', function() {
-//     // Common functionality
-//     setCurrentDate();
-    
-//     // Check if user is logged in
-//     const token = getCookie('token');
-//     if (!token && !window.location.pathname.includes('/login')) {
-//         window.location.href = '/login';
-//     }
-    
-//     // Page-specific functionality
-//     if (window.location.pathname === '/login') {
-//         setupLoginPage();
-//     } else if (window.location.pathname === '/dashboard') {
-//         setupDashboardPage();
-//     } else if (window.location.pathname === '/mark-attendance') {
-//         setupMarkAttendancePage();
-//     } else if (window.location.pathname === '/view-records') {
-//         setupViewRecordsPage();
-//     } else if (window.location.pathname === '/export') {
-//         setupExportPage();
-//     }
-    
-//     // Logout button (present on all pages except login)
-//     const logoutBtn = document.getElementById('logoutBtn');
-//     if (logoutBtn) {
-//         logoutBtn.addEventListener('click', logout);
-//     }
-// });
 
-document.addEventListener('DOMContentLoaded', async function() {
-    // Common functionality
+document.addEventListener('DOMContentLoaded', async function () {
     setCurrentDate();
-    
-    // First check authentication state
+
+    const getCookie = (cookieName) => {
+        const cookies = document.cookie.split('; ');
+        console.log(cookies)
+        for (const cookie of cookies) {
+            const [name, value] = cookie.split('=');
+            if (name === cookieName) {
+                return decodeURIComponent(value);
+            }
+        }
+        return null;
+    };
+
     const token = getCookie('token');
     const isLoginPage = window.location.pathname === '/login';
-    
-    // If no token and not on login page, redirect to login
+    console.log('token',token)
+
     if (!token && !isLoginPage) {
-        window.location.href = '/login';
-        return; // Important to stop execution
+        console.log("Token not found. Redirecting to login...");
+        // window.location.href = '/login';
+        return;
     }
-    
-    // If token exists and we're on login page, redirect to dashboard
+
     if (token && isLoginPage) {
+        console.log("Already logged in. Redirecting to dashboard...");
         window.location.href = '/dashboard';
-        return; // Important to stop execution
+        return;
     }
-    
-    // If we get here, we're either:
-    // 1. Logged in and on a protected page, or
-    // 2. Not logged in and on the login page
-    
+
     try {
-        // For protected pages, verify the token is still valid
         if (token) {
             const isValid = await verifyToken(token);
             if (!isValid) {
-                // Token is invalid, clear it and redirect
                 document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                 window.location.href = '/login';
                 return;
             }
         }
-        
-        // Now setup page-specific functionality
-        if (isLoginPage) {
-            setupLoginPage();
-        } else if (window.location.pathname === '/dashboard') {
-            setupDashboardPage();
-        } else if (window.location.pathname === '/mark-attendance') {
-            setupMarkAttendancePage();
-        } else if (window.location.pathname === '/view-records') {
-            setupViewRecordsPage();
-        } else if (window.location.pathname === '/export') {
-            setupExportPage();
+
+        // Page-specific logic
+        switch (window.location.pathname) {
+            case '/login':
+                setupLoginPage();
+                break;
+            case '/dashboard':
+                setupDashboardPage();
+                break;
+            case '/mark-attendance':
+                setupMarkAttendancePage();
+                break;
+            case '/view-records':
+                setupViewRecordsPage();
+                break;
+            case '/export':
+                setupExportPage();
+                break;
         }
-        
-        // Setup logout button if present
+
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', logout);
         }
     } catch (error) {
         console.error('Initialization error:', error);
-        // Fallback to login page if something went wrong
         if (!isLoginPage) {
             window.location.href = '/login';
         }
     }
 });
+
 
 // Add this helper function to verify token with server
 async function verifyToken(token) {
@@ -114,7 +95,9 @@ async function verifyToken(token) {
 
 // Enhanced getCookie function
 function getCookie(name) {
+    console.log(name)
     const cookies = document.cookie.split('; ');
+    
     for (const cookie of cookies) {
         const [cookieName, cookieValue] = cookie.split('=');
         if (cookieName === name) {
@@ -142,6 +125,7 @@ function getCookie(name) {
 
 async function fetchWithAuth(url, options = {}) {
     const token = getCookie('token');
+    console.log("tdrtdy",token)
     if (!token) {
         window.location.href = '/login';
         return;
@@ -231,7 +215,8 @@ function setupLoginPage() {
                     };
                     
                     const startTime = Date.now();
-                    checkCookie();
+                    window.location.href = '/dashboard';
+                    //checkCookie();
                 } else {
                     throw new Error(data.message || 'Login failed');
                 }
@@ -250,7 +235,7 @@ function setupDashboardPage() {
     loadDashboardData();
     
     // Set up auto-refresh every 30 seconds
-    setInterval(loadDashboardData, 30000);
+    //setInterval(loadDashboardData, 30000);
 }
 
 async function loadDashboardData() {

@@ -29,10 +29,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Database connection
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'root',
-    database: process.env.DB_NAME || 'attendance_systems'
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'attendance_systems'
 };
 
 let pool;
@@ -142,11 +142,11 @@ app.post('/api/login', [
       
       // Enhanced cookie settings
       res.cookie('token', token, { 
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 3600000, // 1 hour
-          path: '/'
+        httpOnly: false,      // You want to read it in JavaScript
+        secure: false,        // Only set true if using HTTPS
+        sameSite: 'Lax',      // Prevents CSRF but allows basic cross-page navigation
+        maxAge: 3600000, 
+        path: '/'
       });
       
       res.json({ 
